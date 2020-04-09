@@ -1,45 +1,28 @@
 source 'https://rubygems.org'
-git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
-ruby '2.3.3'
-
+git_source(:github) do |repo_name|
+  repo_name = "#{repo_name}/#{repo_name}" unless repo_name.include?("/")
+  "https://github.com/#{repo_name}.git"
+end
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails'
-# Use sqlite3 as the database for Active Record
-gem 'sqlite3', '<1.4'
-# Use Puma as the app server
-gem 'puma', '~> 3.11'
-# Use SCSS for stylesheets
+ruby '~> 2.6.6'
+gem 'rails', '~> 5.1.7'
+gem 'puma', '~> 3.7'
 gem 'sass-rails', '~> 5.0'
-# Use Uglifier as compressor for JavaScript assets
 gem 'uglifier', '>= 1.3.0'
-# See https://github.com/rails/execjs#readme for more supported runtimes
 gem 'duktape'
-# Use CoffeeScript for .coffee assets and views
 gem 'coffee-rails', '~> 4.2'
-# Turbolinks makes navigating your web application faster. Read more: https://github.com/turbolinks/turbolinks
 gem 'turbolinks', '~> 5'
-# Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 gem 'jbuilder', '~> 2.5'
-# Use Redis adapter to run Action Cable in production
-# gem 'redis', '~> 4.0'
-# Use ActiveModel has_secure_password
-# gem 'bcrypt', '~> 3.1.7'
 gem 'twitter-bootstrap-rails', '~> 3.2', '>= 3.2.2'
 gem "font-awesome-rails"
-# Use ActiveStorage variant
-# gem 'mini_magick', '~> 4.8'
-# Use jquery as the JavaScript library
 gem 'jquery-rails'
 gem 'jquery-ui-rails'
-# Use Capistrano for deployment
-# gem 'capistrano-rails', group: :development
+
 gem 'bootstrap-sass', '~> 3.3', '>= 3.3.7'
 gem 'momentjs-rails', '>= 2.9.0'
 gem 'bootstrap3-datetimepicker-rails', '~> 4.14.30'
-# Bootstrap forms
 gem 'bootstrap_form', '~> 2.6'
-# Reduces boot times through caching; required in config/boot.rb
 gem 'bootsnap', '<= 1.1.0'
 gem 'client_side_validations', '~> 9.0', '>= 9.0.1'
 
@@ -53,6 +36,7 @@ group :development do
   gem 'web-console', '>= 3.3.0'
   gem 'spring'
   gem 'spring-watcher-listen', '~> 2.0.0'
+  gem 'sqlite3', '<1.4'
 end
 
 group :test do
@@ -65,3 +49,8 @@ end
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
+
+group :production do
+  gem 'pg'
+  gem 'rails_12factor', '~> 0.0.3'
+end
