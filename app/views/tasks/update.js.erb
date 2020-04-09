@@ -1,0 +1,8 @@
+$("#edit_task_<%= @task.id %>").slideUp();
+var currentClass = $("#task_<%= @task.id %>_name").attr('class');
+$("#task_<%= @task.id %>_name").replaceWith("<%= j render 'task_name', task: @task %>");
+
+$('#edit_task_<%= @task.id %>_form').enableClientSideValidations();
+
+$("#task_<%= @task.id %>_name").addClass(currentClass);
+

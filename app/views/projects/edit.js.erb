@@ -1,0 +1,7 @@
+$("#edit_project_<%= @id %>").html("<%= j(render 'projects/edit_project_form', project: @project) %>").show;
+
+$("#edit_project_<%= @id %>_form").enableClientSideValidations();
+
+
+$("#project_<%= @id %>_edit_icon").toggleClass("glyphicon-edit glyphicon-remove");
+

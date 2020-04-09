@@ -1,0 +1,8 @@
+$('#new_project').html("<%= j(render 'projects/new_project_form', project: @project) %>")
+    .slideToggle();
+
+    $("#add_project_image").toggleClass("glyphicon-plus");
+
+
+$("#new_project_form").enableClientSideValidations();
+

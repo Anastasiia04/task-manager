@@ -1,0 +1,5 @@
+$("#tasks_<%= @project.id %>").prepend("<%= j(render 'tasks/task', task: @task, project: @project) %>");
+$('.field').val('');
+$('new_task_form_for_project_<%= @project.id %>').enableClientSideValidations();
+$('#sortable_in_<%= @project.id %>').show();
+

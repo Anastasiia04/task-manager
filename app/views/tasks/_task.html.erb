@@ -1,0 +1,49 @@
+<div id="task_<%= task.id %>" class="list-group-item task">
+
+ <%= check_box_tag 'complete', task.completed, task.completed,:data => {remote: true, url: url_for(action: 'complete', id: task.id, complete: task.completed, controller: :tasks), method: :post } %>
+  </span>
+
+
+
+  <p id="task_<%= task.id %>_name" class="task_name <%= 'completed' if task.completed %>">
+    <%= task.name %>
+  </p>
+  
+ <%= link_to deadline_task_path(task), remote: true do %>
+      <span class="task_controls glyphicon glyphicon-time controls date_picker_icon"></span>
+  <% end %>
+    <span>
+
+        <div id="datepicker_for_task_<%= task.id %>" class="datepicker_for_task">
+      <%= bootstrap_form_for(:task, layout: :inline,
+                             url: deadline_task_path(task), remote: true) do |f| %>
+          <div class="input-group date datepicker">
+            <%= f.date_field :deadline, hide_label: true, placeholder: 'dd/mm/YYYY' %>
+            <span class="input-group-addon">
+              <span class="task_controls glyphicon glyphicon-time"></span>
+            </span>
+          </div>
+            <%= f.submit 'Set task deadline', class: 'btn btn-info' %>
+      <% end %>
+    </div>
+
+
+  </span>
+  <%= link_to [task.project, task], method: :delete, data: {confirm: 'Are you sure?'}, remote: true do %>
+      <span class="task_controls glyphicon glyphicon-remove controls delete"></span>
+  <% end %>
+
+
+  <%= link_to edit_project_task_path(project, task), remote: true do %>
+      <span id="task_<%= task.id %>_edit_icon"
+            class="task_controls glyphicon glyphicon-edit controls edit"></span>
+  <% end %>
+
+  <span id="move_task_icon" class="task_controls glyphicon glyphicon-move controls move"></span>
+<span>
+   
+
+</div>
+
+<div id="edit_task_<%= task.id %>" class="edit_task"></div>
+

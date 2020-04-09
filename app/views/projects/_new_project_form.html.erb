@@ -1,0 +1,26 @@
+<div class="panel-heading">
+
+  <%= link_to '', remote: true, controller: 'projects#index' do %>
+      <span id="close_new_project_form" class="glyphicon glyphicon-remove controls edit"></span>
+  <% end %>
+
+  <%= form_for(project, remote: true, validate: true, html: { class: 'project_form row', id: 'new_project_form'}) do |f| %>
+      <% if project.errors.any? %>
+          <div id="error_explanation">
+            <h2><%= pluralize(project.errors.count, "error") %> prohibited this project from being saved:</h2>
+
+            <ul>
+              <% project.errors.full_messages.each do |message| %>
+                  <li><%= message %></li>
+              <% end %>
+            </ul>
+          </div>
+      <% end %>
+
+      <%= f.label :project_name, class: 'col-md-2' %>
+      <%= f.text_field :name, id: 'project_name_field', class: 'col-md-7' %>
+      <%= f.submit class: 'btn btn-primary btn-sm col-md-2' %>
+  <% end %>
+  <div class="errors"></div>
+</div>
+

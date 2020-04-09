@@ -1,0 +1,15 @@
+<div class="container">
+  <h1>ToDo List</h1>
+  <div id="projects" class="panel-group">
+    <%= render 'projects', projects: @projects %>
+  </div>
+
+  <div id="new_project" class="panel panel-default new_project"></div>
+
+  <div id="add_project">
+    <%= link_to new_project_path, class: "btn btn-primary btn-lg btn-block", remote: true do %>
+        <span id="add_project_image" class="glyphicon glyphicon-plus"></span>
+        <span id="add_project_text">Add ToDo list</span>
+    <% end %>
+  </div>
+</div>

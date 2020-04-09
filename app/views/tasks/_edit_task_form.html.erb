@@ -1,0 +1,7 @@
+<%= form_for([@project, @task], remote: true, validate: true, html: {class: 'edit_task_form', id: "edit_task_#{@task.id}_form"}) do |f| %>
+    <%= f.label :name %>
+    <%= f.text_field :name, placeholder: @task.name, id: "edit_task_#{@task.id}_name_field", class: 'edit_task_name_field' %>
+    <%= f.submit class: 'btn btn-primary btn-sm'%>
+<% end %>
+<div class="errors"></div>
+

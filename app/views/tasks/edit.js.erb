@@ -1,0 +1,8 @@
+$('#edit_task_<%= @task.id %>')
+    .html("<%= j(render 'tasks/edit_task_form', project: @project) %>").slideToggle();
+
+$('#edit_task_<%= @task.id %>_name_field').val('').focus();
+
+
+$('#edit_task_<%= @task.id %>_form').enableClientSideValidations();
+
