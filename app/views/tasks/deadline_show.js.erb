@@ -1,7 +1,9 @@
 $('#datepicker_for_task_<%= @task.id %>').slideToggle();
-$('#datepicker_for_task_<%= @task.id %>').find('#task_deadline').val('').focus();
 
 $('#task_<%= @task.id %>').find('.date_picker_icon').fadeOut(200, function () {
     $(this).toggleClass("glyphicon-time glyphicon-delete").fadeIn(200)
 });
+
+$('#edit_task_<%= @task.id %>_form').enableClientSideValidations();
+$('#datepicker_for_task_<%= @task.id %>').show();
 

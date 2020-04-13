@@ -1,0 +1,6 @@
+<%= form_for([@project, @task], remote: true, validate: true, html: {class: 'datepicker_task_form', id: "datepicker_task_#{@task.id}_form"}) do |f| %>
+    <%= f.label :deadline %>
+    <%= f.text_field :deadline, placeholder: @task.deadline, id: "datepicker_task_#{@task.id}_deadline_field", class: 'datepicker_task_deadline_field' %>
+    <%= f.submit class: 'btn btn-primary btn-sm'%>
+<% end %>
+<div class="errors"></div>

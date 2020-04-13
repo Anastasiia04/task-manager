@@ -1,0 +1,26 @@
+current directory: C:/task-manager/vendor/cache/ruby/2.3.0/gems/bootsnap-1.1.0/ext/bootsnap
+C:/RailsInstaller/Ruby2.3.3/bin/ruby.exe -r ./siteconf20200412-2560-1iobzkh.rb extconf.rb
+creating Makefile
+
+current directory: C:/task-manager/vendor/cache/ruby/2.3.0/gems/bootsnap-1.1.0/ext/bootsnap
+make "DESTDIR=" clean
+
+current directory: C:/task-manager/vendor/cache/ruby/2.3.0/gems/bootsnap-1.1.0/ext/bootsnap
+make "DESTDIR="
+generating bootsnap-i386-mingw32.def
+compiling bootsnap.c
+bootsnap.c: In function 'bs_cache_path':
+bootsnap.c:221:3: warning: unknown conversion type character 'l' in format [-Wformat]
+bootsnap.c:221:3: warning: too many arguments for format [-Wformat-extra-args]
+bootsnap.c: In function 'bs_rb_fetch':
+bootsnap.c:260:3: warning: ISO C90 forbids mixed declarations and code [-Wdeclaration-after-statement]
+bootsnap.c: In function 'fetch_cached_data':
+bootsnap.c:380:3: warning: comparison is always false due to limited range of data type [-Wtype-limits]
+bootsnap.c: In function 'bs_rb_fetch':
+bootsnap.c:582:13: warning: 'output_data' may be used uninitialized in this function [-Wmaybe-uninitialized]
+bootsnap.c:560:9: note: 'output_data' was declared here
+linking shared-object bootsnap/bootsnap.so
+
+current directory: C:/task-manager/vendor/cache/ruby/2.3.0/gems/bootsnap-1.1.0/ext/bootsnap
+make "DESTDIR=" install
+/usr/bin/install -c -m 0755 bootsnap.so ./.gem.20200412-2560-zjsi50/bootsnap

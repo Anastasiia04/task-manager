@@ -1,8 +1,22 @@
 $('#new_project').html("<%= j(render 'projects/new_project_form', project: @project) %>")
-    .slideToggle();
+    .slideToggle(function () {
+        $('#add_project_text').text(function (i, v) {
+            return v === 'Add ToDo list' ? 'Close' : 'Add ToDo list'
+        });
 
-    $("#add_project_image").toggleClass("glyphicon-plus");
+        $("#add_project_image").toggleClass("glyphicon-plus glyphicon-remove");
 
+    });
+
+
+$('#close_new_project_form').click( function() {
+    $('#new_project').slideToggle();
+
+    $('#add_project_text').text(function (i, v) {
+        return v === 'Add ToDo list' ? 'Close' : 'Add ToDo list'
+    });
+
+    $("#add_project_image").toggleClass("glyphicon-plus glyphicon-remove");
+});
 
 $("#new_project_form").enableClientSideValidations();
-

@@ -3,7 +3,7 @@
 
   <div class="panel-heading">
     <span id="project_name_<%= project.id %>" class="header"><%= project.name %></span>
-    <%= link_to [project], method: :delete, data: { confirm: 'Are you sure?' },remote: true do %>
+    <%= link_to [project], method: :delete, data: { confirm: 'Are you sure?' }, remote: true do %>
     <span class="glyphicon glyphicon-remove controls delete"></span>
     <% end %>
 
@@ -15,7 +15,7 @@
 
     <div class="edit_project" id="edit_project_<%= project.id %>"></div>
 
-    <%= form_for([project, project.tasks.build], remote: true, validate: true,html: {class: 'add_task', id: "new_task_form_for_project_#{project.id}"}) do |f| %>
+    <%= form_for([project, project.tasks.build], remote: true, validate: true, html: {class: 'add_task', id: "new_task_form_for_project_#{project.id}"}) do |f| %>
     <%= f.text_field :name, placeholder: 'Add a new task...', class: 'field'%>
     <%= f.submit 'Add task', class: 'btn btn-primary btn-sm' %>
     <% end %>
