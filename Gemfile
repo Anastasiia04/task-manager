@@ -26,7 +26,7 @@ gem 'bootstrap_form', '~> 2.6'
 gem 'bootsnap', '<= 1.1.0'
 gem 'client_side_validations', '~> 9.0', '>= 9.0.1'
 gem 'devise'
-gem 'sqlite3', '<1.4'
+
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
@@ -37,6 +37,7 @@ group :development do
   gem 'web-console', '>= 3.3.0'
   gem 'spring'
   gem 'spring-watcher-listen', '~> 2.0.0'
+  gem 'sqlite3', '<1.4'
   
 end
 
