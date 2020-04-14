@@ -1,5 +1,5 @@
 current directory: C:/task-manager/vendor/cache/ruby/2.3.0/gems/bootsnap-1.1.0/ext/bootsnap
-C:/RailsInstaller/Ruby2.3.3/bin/ruby.exe -r ./siteconf20200412-2560-1iobzkh.rb extconf.rb
+C:/RailsInstaller/Ruby2.3.3/bin/ruby.exe -r ./siteconf20200414-7120-wwk0yw.rb extconf.rb
 creating Makefile
 
 current directory: C:/task-manager/vendor/cache/ruby/2.3.0/gems/bootsnap-1.1.0/ext/bootsnap
@@ -23,4 +23,4 @@ linking shared-object bootsnap/bootsnap.so
 
 current directory: C:/task-manager/vendor/cache/ruby/2.3.0/gems/bootsnap-1.1.0/ext/bootsnap
 make "DESTDIR=" install
-/usr/bin/install -c -m 0755 bootsnap.so ./.gem.20200412-2560-zjsi50/bootsnap
+/usr/bin/install -c -m 0755 bootsnap.so ./.gem.20200414-7120-zfx2i9/bootsnap

@@ -1,5 +1,5 @@
 current directory: C:/task-manager/vendor/cache/ruby/2.3.0/gems/duktape-2.3.0.0/ext/duktape
-C:/RailsInstaller/Ruby2.3.3/bin/ruby.exe -r ./siteconf20200412-2560-1wsxi19.rb extconf.rb
+C:/RailsInstaller/Ruby2.3.3/bin/ruby.exe -r ./siteconf20200414-7120-m12oqu.rb extconf.rb
 checking for rb_sym2str()... yes
 creating Makefile
 
@@ -45,4 +45,4 @@ linking shared-object duktape_ext.so
 
 current directory: C:/task-manager/vendor/cache/ruby/2.3.0/gems/duktape-2.3.0.0/ext/duktape
 make "DESTDIR=" install
-/usr/bin/install -c -m 0755 duktape_ext.so ./.gem.20200412-2560-1jqjhcu
+/usr/bin/install -c -m 0755 duktape_ext.so ./.gem.20200414-7120-uosn6s

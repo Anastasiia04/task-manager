@@ -7,6 +7,7 @@ class TasksController < ApplicationController
     end
   end
 
+
   def create
     @project = Project.find(params[:project_id])
     @task = @project.tasks.create(task_params)
@@ -42,7 +43,23 @@ class TasksController < ApplicationController
       format.js { @task }
     end
   end
+  
+  def move_up
+    
+    Task.find(params[:id]).move_higher
+    respond_to do |format|
+      format.html {redirect_to projects_path}
+      format.js { @task }
+    end
+  end
 
+  def move_down
+    Task.find(params[:id]).move_lower
+    respond_to do |format|
+      format.html {redirect_to projects_path}
+      format.js { @task }
+    end
+  end
   def show
   end
 

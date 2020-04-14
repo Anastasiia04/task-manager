@@ -22,6 +22,9 @@
     <%= check_box_tag 'complete', task.completed, task.completed,:data => {remote: true, url: url_for(action: 'complete', id: task.id, complete: task.completed, controller: :tasks), method: :post } %>
 
   </span>
+  <%= task.position %>
+
+  <%= render('tasks/move', task: task) %>
 
   <%= link_to [task.project, task], method: :delete, data: {confirm: 'Are you sure?'}, remote: true do %>
   <span class="task_controls glyphicon glyphicon-remove controls delete"></span>
@@ -31,9 +34,7 @@
     class="task_controls glyphicon glyphicon-edit controls edit"></span>
     <% end %>
 
-    <span id="move_task_icon" class="task_controls glyphicon glyphicon-move controls move"></span>
-
-
+    
 
     <p id="task_<%= task.id %>_name" class="task_name <%= 'completed' if task.completed %>">
       <%= task.name %>

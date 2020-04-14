@@ -1,0 +1,653 @@
+diff --git a/Gemfile b/Gemfile
+index 079265c..e41610d 100644
+--- a/Gemfile
++++ b/Gemfile
+@@ -18,15 +18,15 @@ gem 'twitter-bootstrap-rails', '~> 3.2', '>= 3.2.2'
+ gem "font-awesome-rails"
+ gem 'jquery-rails'
+ gem 'jquery-ui-rails', '~> 5.0.5'
+-
++gem 'pry-rails'
+ gem 'bootstrap-sass', '~> 3.3', '>= 3.3.7'
+ gem 'momentjs-rails', '>= 2.9.0'
+ gem 'bootstrap3-datetimepicker-rails', '~> 4.14.30'
+ gem 'bootstrap_form', '~> 2.6'
+ gem 'bootsnap', '<= 1.1.0'
+ gem 'client_side_validations', '~> 9.0', '>= 9.0.1'
+-gem 'devise'
+ 
++gem 'acts_as_list'
+ group :development, :test do
+   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
+   gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
+diff --git a/Gemfile.lock b/Gemfile.lock
+index 540d13c..82faa94 100644
+--- a/Gemfile.lock
++++ b/Gemfile.lock
+@@ -38,6 +38,8 @@ GEM
+       i18n (>= 0.7, < 2)
+       minitest (~> 5.1)
+       tzinfo (~> 1.1)
++    acts_as_list (0.9.19)
++      activerecord (>= 3.0)
+     addressable (2.7.0)
+       public_suffix (>= 2.0.2, < 5.0)
+     archive-zip (0.12.0)
+@@ -45,7 +47,6 @@ GEM
+     arel (8.0.0)
+     autoprefixer-rails (9.7.6)
+       execjs
+-    bcrypt (3.1.13)
+     bindex (0.8.1)
+     bootsnap (1.1.0)
+       msgpack (~> 1.0)
+@@ -72,6 +73,7 @@ GEM
+       jquery-rails (~> 4.3)
+       js_regex (~> 1.2)
+       rails (>= 5.0.0.1, < 5.2)
++    coderay (1.1.2)
+     coffee-rails (4.2.2)
+       coffee-script (>= 2.2.0)
+       railties (>= 4.0.0)
+@@ -82,12 +84,6 @@ GEM
+     commonjs (0.2.7)
+     concurrent-ruby (1.1.6)
+     crass (1.0.6)
+-    devise (4.7.1)
+-      bcrypt (~> 3.0)
+-      orm_adapter (~> 0.1)
+-      railties (>= 4.1.0)
+-      responders
+-      warden (~> 1.2.3)
+     duktape (2.3.0.0)
+     erubi (1.9.0)
+     execjs (2.7.0)
+@@ -133,8 +129,12 @@ GEM
+     nio4r (2.5.2)
+     nokogiri (1.10.9-x86-mingw32)
+       mini_portile2 (~> 2.4.0)
+-    orm_adapter (0.5.0)
+     pg (1.2.3-x86-mingw32)
++    pry (0.13.1)
++      coderay (~> 1.1)
++      method_source (~> 1.0)
++    pry-rails (0.3.9)
++      pry (>= 0.10.4)
+     public_suffix (4.0.4)
+     puma (3.12.4)
+     rack (2.2.2)
+@@ -173,9 +173,6 @@ GEM
+     rb-inotify (0.10.1)
+       ffi (~> 1.0)
+     regexp_parser (0.5.0)
+-    responders (2.4.1)
+-      actionpack (>= 4.2.0, < 6.0)
+-      railties (>= 4.2.0, < 6.0)
+     rubyzip (1.3.0)
+     sass (3.7.4)
+       sass-listen (~> 4.0.0)
+@@ -223,8 +220,6 @@ GEM
+       tzinfo (>= 1.0.0)
+     uglifier (4.2.0)
+       execjs (>= 0.3.0, < 3)
+-    warden (1.2.8)
+-      rack (>= 2.0.6)
+     web-console (3.7.0)
+       actionview (>= 5.0)
+       activemodel (>= 5.0)
+@@ -240,6 +235,7 @@ PLATFORMS
+   x86-mingw32
+ 
+ DEPENDENCIES
++  acts_as_list
+   bootsnap (<= 1.1.0)
+   bootstrap-sass (~> 3.3, >= 3.3.7)
+   bootstrap3-datetimepicker-rails (~> 4.14.30)
+@@ -249,7 +245,6 @@ DEPENDENCIES
+   chromedriver-helper
+   client_side_validations (~> 9.0, >= 9.0.1)
+   coffee-rails (~> 4.2)
+-  devise
+   duktape
+   font-awesome-rails
+   jbuilder (~> 2.5)
+@@ -257,6 +252,7 @@ DEPENDENCIES
+   jquery-ui-rails (~> 5.0.5)
+   momentjs-rails (>= 2.9.0)
+   pg
++  pry-rails
+   puma (~> 3.7)
+   rails (~> 5.1.7)
+   rails_12factor (~> 0.0.3)
+diff --git a/app/assets/javascripts/application.js b/app/assets/javascripts/application.js
+index 3ca13b1..78c0e7a 100644
+--- a/app/assets/javascripts/application.js
++++ b/app/assets/javascripts/application.js
+@@ -18,4 +18,5 @@
+ //= require turbolinks
+ //= require bootstrap
+ //= require rails.validations
++//= require rails-ujs
+ //= require_tree
+\ No newline at end of file
+diff --git a/app/controllers/tasks_controller.rb b/app/controllers/tasks_controller.rb
+index 7450d19..dc3db62 100644
+--- a/app/controllers/tasks_controller.rb
++++ b/app/controllers/tasks_controller.rb
+@@ -7,6 +7,7 @@ class TasksController < ApplicationController
+     end
+   end
+ 
++
+   def create
+     @project = Project.find(params[:project_id])
+     @task = @project.tasks.create(task_params)
+@@ -42,7 +43,23 @@ class TasksController < ApplicationController
+       format.js { @task }
+     end
+   end
++  
++  def move_up
++    
++    @task.move_higher
++    respond_to do |format|
++      format.html {redirect_to projects_path}
++      format.js { @task }
++    end
++  end
+ 
++  def move_down
++    @task.move_lower
++    respond_to do |format|
++      format.html {redirect_to projects_path}
++      format.js { @task }
++    end
++  end
+   def show
+   end
+ 
+@@ -105,4 +122,4 @@ class TasksController < ApplicationController
+     def task_params
+       params.require(:task).permit(:name, :project_id, :deadline => [])
+     end
+-end
++end
+\ No newline at end of file
+diff --git a/app/helpers/tasks_helper.rb b/app/helpers/tasks_helper.rb
+index ce894d0..861c6bc 100644
+--- a/app/helpers/tasks_helper.rb
++++ b/app/helpers/tasks_helper.rb
+@@ -1,2 +1,4 @@
+ module TasksHelper
++	 
++
+ end
+diff --git a/app/models/project.rb b/app/models/project.rb
+index e521790..e1f918d 100644
+--- a/app/models/project.rb
++++ b/app/models/project.rb
+@@ -1,5 +1,5 @@
+ class Project < ApplicationRecord
+-	has_many :tasks, dependent: :destroy
++	has_many :tasks, -> { order(position: :asc) }, dependent: :destroy
+   validates :name, presence: true, length: {in: 1..200}
+   validates_associated :tasks
+ end
+diff --git a/app/models/task.rb b/app/models/task.rb
+index ee488bc..0e6c098 100644
+--- a/app/models/task.rb
++++ b/app/models/task.rb
+@@ -5,4 +5,6 @@ class Task < ApplicationRecord
+   default_scope -> { order ('created_at DESC') }
+   scope :completed, -> { where(completed: true) }
+   scope :uncompleted, -> { where(completed: false) }
++  acts_as_list scope: :project
++  
+ end
+diff --git a/app/views/tasks/_task.html.erb b/app/views/tasks/_task.html.erb
+index 4788570..1aabbf3 100644
+--- a/app/views/tasks/_task.html.erb
++++ b/app/views/tasks/_task.html.erb
+@@ -31,8 +31,11 @@
+     class="task_controls glyphicon glyphicon-edit controls edit"></span>
+     <% end %>
+ 
+-    <span id="move_task_icon" class="task_controls glyphicon glyphicon-move controls move"></span>
++    <%= task.priority %>
+ 
++  <%= render('tasks/move', task: task) %>
++
++ 
+ 
+ 
+     <p id="task_<%= task.id %>_name" class="task_name <%= 'completed' if task.completed %>">
+diff --git a/config/routes.rb b/config/routes.rb
+index 154b9db..218cd91 100644
+--- a/config/routes.rb
++++ b/config/routes.rb
+@@ -7,6 +7,8 @@ Rails.application.routes.draw do
+   root 'projects#index'
+   match '/tasks/complete/:id' => 'tasks#complete', as: 'complete_task', via: :post
+   match '/tasks/deadline/:id' => 'tasks#deadline', as: 'deadline_task', via: :post
++  match 'tasks/:id/move_up',    to: 'tasks#move_up', as: 'move_up_task',  via: 'patch'
++  match 'tasks/:id/move_down',  to: 'tasks#move_down', as: 'move_down_task',  via: 'patch'
+   get '/tasks/deadline/:id', to: 'tasks#deadline_show'
+   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
+   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
+diff --git a/db/schema.rb b/db/schema.rb
+index 7746f69..1096af2 100644
+--- a/db/schema.rb
++++ b/db/schema.rb
+@@ -10,7 +10,7 @@
+ #
+ # It's strongly recommended that you check this file into your version control system.
+ 
+-ActiveRecord::Schema.define(version: 20200408235100) do
++ActiveRecord::Schema.define(version: 20200413224305) do
+ 
+   create_table "projects", force: :cascade do |t|
+     t.string "name"
+@@ -26,6 +26,7 @@ ActiveRecord::Schema.define(version: 20200408235100) do
+     t.boolean "completed", default: false
+     t.integer "priority", default: 1
+     t.date "deadline"
++    t.integer "position"
+     t.index ["project_id"], name: "index_tasks_on_project_id"
+   end
+ 
+diff --git a/vendor/cache/actioncable-5.1.7.gem b/vendor/cache/actioncable-5.1.7.gem
+deleted file mode 100644
+index d10cd12..0000000
+Binary files a/vendor/cache/actioncable-5.1.7.gem and /dev/null differ
+diff --git a/vendor/cache/actionmailer-5.1.7.gem b/vendor/cache/actionmailer-5.1.7.gem
+deleted file mode 100644
+index 7d2279c..0000000
+Binary files a/vendor/cache/actionmailer-5.1.7.gem and /dev/null differ
+diff --git a/vendor/cache/actionpack-5.1.7.gem b/vendor/cache/actionpack-5.1.7.gem
+deleted file mode 100644
+index 55da499..0000000
+Binary files a/vendor/cache/actionpack-5.1.7.gem and /dev/null differ
+diff --git a/vendor/cache/actionview-5.1.7.gem b/vendor/cache/actionview-5.1.7.gem
+deleted file mode 100644
+index 204bdf5..0000000
+Binary files a/vendor/cache/actionview-5.1.7.gem and /dev/null differ
+diff --git a/vendor/cache/activejob-5.1.7.gem b/vendor/cache/activejob-5.1.7.gem
+deleted file mode 100644
+index 2a9ecda..0000000
+Binary files a/vendor/cache/activejob-5.1.7.gem and /dev/null differ
+diff --git a/vendor/cache/activemodel-5.1.7.gem b/vendor/cache/activemodel-5.1.7.gem
+deleted file mode 100644
+index d158e89..0000000
+Binary files a/vendor/cache/activemodel-5.1.7.gem and /dev/null differ
+diff --git a/vendor/cache/activerecord-5.1.7.gem b/vendor/cache/activerecord-5.1.7.gem
+deleted file mode 100644
+index 9d95585..0000000
+Binary files a/vendor/cache/activerecord-5.1.7.gem and /dev/null differ
+diff --git a/vendor/cache/activesupport-5.1.7.gem b/vendor/cache/activesupport-5.1.7.gem
+deleted file mode 100644
+index f49aefa..0000000
+Binary files a/vendor/cache/activesupport-5.1.7.gem and /dev/null differ
+diff --git a/vendor/cache/addressable-2.7.0.gem b/vendor/cache/addressable-2.7.0.gem
+deleted file mode 100644
+index 263158b..0000000
+Binary files a/vendor/cache/addressable-2.7.0.gem and /dev/null differ
+diff --git a/vendor/cache/archive-zip-0.12.0.gem b/vendor/cache/archive-zip-0.12.0.gem
+deleted file mode 100644
+index 7e171f3..0000000
+Binary files a/vendor/cache/archive-zip-0.12.0.gem and /dev/null differ
+diff --git a/vendor/cache/arel-8.0.0.gem b/vendor/cache/arel-8.0.0.gem
+deleted file mode 100644
+index ab78122..0000000
+Binary files a/vendor/cache/arel-8.0.0.gem and /dev/null differ
+diff --git a/vendor/cache/autoprefixer-rails-9.7.6.gem b/vendor/cache/autoprefixer-rails-9.7.6.gem
+deleted file mode 100644
+index b357943..0000000
+Binary files a/vendor/cache/autoprefixer-rails-9.7.6.gem and /dev/null differ
+diff --git a/vendor/cache/bcrypt-3.1.13.gem b/vendor/cache/bcrypt-3.1.13.gem
+deleted file mode 100644
+index 9771967..0000000
+Binary files a/vendor/cache/bcrypt-3.1.13.gem and /dev/null differ
+diff --git a/vendor/cache/bindex-0.8.1.gem b/vendor/cache/bindex-0.8.1.gem
+deleted file mode 100644
+index ebf48db..0000000
+Binary files a/vendor/cache/bindex-0.8.1.gem and /dev/null differ
+diff --git a/vendor/cache/bootsnap-1.1.0.gem b/vendor/cache/bootsnap-1.1.0.gem
+deleted file mode 100644
+index bb30024..0000000
+Binary files a/vendor/cache/bootsnap-1.1.0.gem and /dev/null differ
+diff --git a/vendor/cache/bootstrap-sass-3.4.1.gem b/vendor/cache/bootstrap-sass-3.4.1.gem
+deleted file mode 100644
+index 1cb8982..0000000
+Binary files a/vendor/cache/bootstrap-sass-3.4.1.gem and /dev/null differ
+diff --git a/vendor/cache/bootstrap3-datetimepicker-rails-4.14.30.gem b/vendor/cache/bootstrap3-datetimepicker-rails-4.14.30.gem
+deleted file mode 100644
+index f5b5fa3..0000000
+Binary files a/vendor/cache/bootstrap3-datetimepicker-rails-4.14.30.gem and /dev/null differ
+diff --git a/vendor/cache/bootstrap_form-2.7.0.gem b/vendor/cache/bootstrap_form-2.7.0.gem
+deleted file mode 100644
+index 22ee36e..0000000
+Binary files a/vendor/cache/bootstrap_form-2.7.0.gem and /dev/null differ
+diff --git a/vendor/cache/builder-3.2.4.gem b/vendor/cache/builder-3.2.4.gem
+deleted file mode 100644
+index b12407c..0000000
+Binary files a/vendor/cache/builder-3.2.4.gem and /dev/null differ
+diff --git a/vendor/cache/byebug-11.0.1.gem b/vendor/cache/byebug-11.0.1.gem
+deleted file mode 100644
+index c4dae2b..0000000
+Binary files a/vendor/cache/byebug-11.0.1.gem and /dev/null differ
+diff --git a/vendor/cache/capybara-3.9.0.gem b/vendor/cache/capybara-3.9.0.gem
+deleted file mode 100644
+index 9d8bfd3..0000000
+Binary files a/vendor/cache/capybara-3.9.0.gem and /dev/null differ
+diff --git a/vendor/cache/childprocess-3.0.0.gem b/vendor/cache/childprocess-3.0.0.gem
+deleted file mode 100644
+index 7cf28fe..0000000
+Binary files a/vendor/cache/childprocess-3.0.0.gem and /dev/null differ
+diff --git a/vendor/cache/chromedriver-helper-2.1.1.gem b/vendor/cache/chromedriver-helper-2.1.1.gem
+deleted file mode 100644
+index c5de729..0000000
+Binary files a/vendor/cache/chromedriver-helper-2.1.1.gem and /dev/null differ
+diff --git a/vendor/cache/client_side_validations-9.3.4.gem b/vendor/cache/client_side_validations-9.3.4.gem
+deleted file mode 100644
+index ca49aa3..0000000
+Binary files a/vendor/cache/client_side_validations-9.3.4.gem and /dev/null differ
+diff --git a/vendor/cache/coffee-rails-4.2.2.gem b/vendor/cache/coffee-rails-4.2.2.gem
+deleted file mode 100644
+index 762e50e..0000000
+Binary files a/vendor/cache/coffee-rails-4.2.2.gem and /dev/null differ
+diff --git a/vendor/cache/coffee-script-2.4.1.gem b/vendor/cache/coffee-script-2.4.1.gem
+deleted file mode 100644
+index 7e4066d..0000000
+Binary files a/vendor/cache/coffee-script-2.4.1.gem and /dev/null differ
+diff --git a/vendor/cache/coffee-script-source-1.12.2.gem b/vendor/cache/coffee-script-source-1.12.2.gem
+deleted file mode 100644
+index 80fabc6..0000000
+Binary files a/vendor/cache/coffee-script-source-1.12.2.gem and /dev/null differ
+diff --git a/vendor/cache/commonjs-0.2.7.gem b/vendor/cache/commonjs-0.2.7.gem
+deleted file mode 100644
+index 6b9e6b8..0000000
+Binary files a/vendor/cache/commonjs-0.2.7.gem and /dev/null differ
+diff --git a/vendor/cache/concurrent-ruby-1.1.6.gem b/vendor/cache/concurrent-ruby-1.1.6.gem
+deleted file mode 100644
+index 74013bb..0000000
+Binary files a/vendor/cache/concurrent-ruby-1.1.6.gem and /dev/null differ
+diff --git a/vendor/cache/crass-1.0.6.gem b/vendor/cache/crass-1.0.6.gem
+deleted file mode 100644
+index 7128f38..0000000
+Binary files a/vendor/cache/crass-1.0.6.gem and /dev/null differ
+diff --git a/vendor/cache/devise-4.7.1.gem b/vendor/cache/devise-4.7.1.gem
+deleted file mode 100644
+index da246a6..0000000
+Binary files a/vendor/cache/devise-4.7.1.gem and /dev/null differ
+diff --git a/vendor/cache/duktape-2.3.0.0.gem b/vendor/cache/duktape-2.3.0.0.gem
+deleted file mode 100644
+index f7b5e2a..0000000
+Binary files a/vendor/cache/duktape-2.3.0.0.gem and /dev/null differ
+diff --git a/vendor/cache/erubi-1.9.0.gem b/vendor/cache/erubi-1.9.0.gem
+deleted file mode 100644
+index e169e65..0000000
+Binary files a/vendor/cache/erubi-1.9.0.gem and /dev/null differ
+diff --git a/vendor/cache/execjs-2.7.0.gem b/vendor/cache/execjs-2.7.0.gem
+deleted file mode 100644
+index 1247cce..0000000
+Binary files a/vendor/cache/execjs-2.7.0.gem and /dev/null differ
+diff --git a/vendor/cache/ffi-1.12.2-x86-mingw32.gem b/vendor/cache/ffi-1.12.2-x86-mingw32.gem
+deleted file mode 100644
+index e950c22..0000000
+Binary files a/vendor/cache/ffi-1.12.2-x86-mingw32.gem and /dev/null differ
+diff --git a/vendor/cache/font-awesome-rails-4.7.0.5.gem b/vendor/cache/font-awesome-rails-4.7.0.5.gem
+deleted file mode 100644
+index b03a84b..0000000
+Binary files a/vendor/cache/font-awesome-rails-4.7.0.5.gem and /dev/null differ
+diff --git a/vendor/cache/globalid-0.4.2.gem b/vendor/cache/globalid-0.4.2.gem
+deleted file mode 100644
+index 8dcf8e3..0000000
+Binary files a/vendor/cache/globalid-0.4.2.gem and /dev/null differ
+diff --git a/vendor/cache/i18n-1.8.2.gem b/vendor/cache/i18n-1.8.2.gem
+deleted file mode 100644
+index 4207f79..0000000
+Binary files a/vendor/cache/i18n-1.8.2.gem and /dev/null differ
+diff --git a/vendor/cache/io-like-0.3.1.gem b/vendor/cache/io-like-0.3.1.gem
+deleted file mode 100644
+index ffce952..0000000
+Binary files a/vendor/cache/io-like-0.3.1.gem and /dev/null differ
+diff --git a/vendor/cache/jbuilder-2.10.0.gem b/vendor/cache/jbuilder-2.10.0.gem
+deleted file mode 100644
+index c13752d..0000000
+Binary files a/vendor/cache/jbuilder-2.10.0.gem and /dev/null differ
+diff --git a/vendor/cache/jquery-rails-4.3.5.gem b/vendor/cache/jquery-rails-4.3.5.gem
+deleted file mode 100644
+index 9f0d844..0000000
+Binary files a/vendor/cache/jquery-rails-4.3.5.gem and /dev/null differ
+diff --git a/vendor/cache/jquery-ui-rails-5.0.5.gem b/vendor/cache/jquery-ui-rails-5.0.5.gem
+deleted file mode 100644
+index e29b33d..0000000
+Binary files a/vendor/cache/jquery-ui-rails-5.0.5.gem and /dev/null differ
+diff --git a/vendor/cache/js_regex-1.2.3.gem b/vendor/cache/js_regex-1.2.3.gem
+deleted file mode 100644
+index 6e5647f..0000000
+Binary files a/vendor/cache/js_regex-1.2.3.gem and /dev/null differ
+diff --git a/vendor/cache/less-2.6.0.gem b/vendor/cache/less-2.6.0.gem
+deleted file mode 100644
+index 4b5b4f1..0000000
+Binary files a/vendor/cache/less-2.6.0.gem and /dev/null differ
+diff --git a/vendor/cache/less-rails-5.0.0.gem b/vendor/cache/less-rails-5.0.0.gem
+deleted file mode 100644
+index 0466a4b..0000000
+Binary files a/vendor/cache/less-rails-5.0.0.gem and /dev/null differ
+diff --git a/vendor/cache/listen-3.2.1.gem b/vendor/cache/listen-3.2.1.gem
+deleted file mode 100644
+index 2035445..0000000
+Binary files a/vendor/cache/listen-3.2.1.gem and /dev/null differ
+diff --git a/vendor/cache/loofah-2.5.0.gem b/vendor/cache/loofah-2.5.0.gem
+deleted file mode 100644
+index cf9c90f..0000000
+Binary files a/vendor/cache/loofah-2.5.0.gem and /dev/null differ
+diff --git a/vendor/cache/mail-2.7.1.gem b/vendor/cache/mail-2.7.1.gem
+deleted file mode 100644
+index 066ef0f..0000000
+Binary files a/vendor/cache/mail-2.7.1.gem and /dev/null differ
+diff --git a/vendor/cache/method_source-1.0.0.gem b/vendor/cache/method_source-1.0.0.gem
+deleted file mode 100644
+index 2e035c3..0000000
+Binary files a/vendor/cache/method_source-1.0.0.gem and /dev/null differ
+diff --git a/vendor/cache/mini_mime-1.0.2.gem b/vendor/cache/mini_mime-1.0.2.gem
+deleted file mode 100644
+index 974ef10..0000000
+Binary files a/vendor/cache/mini_mime-1.0.2.gem and /dev/null differ
+diff --git a/vendor/cache/mini_portile2-2.4.0.gem b/vendor/cache/mini_portile2-2.4.0.gem
+deleted file mode 100644
+index 2d3f347..0000000
+Binary files a/vendor/cache/mini_portile2-2.4.0.gem and /dev/null differ
+diff --git a/vendor/cache/minitest-5.14.0.gem b/vendor/cache/minitest-5.14.0.gem
+deleted file mode 100644
+index 770e832..0000000
+Binary files a/vendor/cache/minitest-5.14.0.gem and /dev/null differ
+diff --git a/vendor/cache/momentjs-rails-2.20.1.gem b/vendor/cache/momentjs-rails-2.20.1.gem
+deleted file mode 100644
+index bbe07f8..0000000
+Binary files a/vendor/cache/momentjs-rails-2.20.1.gem and /dev/null differ
+diff --git a/vendor/cache/msgpack-1.3.3-x86-mingw32.gem b/vendor/cache/msgpack-1.3.3-x86-mingw32.gem
+deleted file mode 100644
+index a077b3a..0000000
+Binary files a/vendor/cache/msgpack-1.3.3-x86-mingw32.gem and /dev/null differ
+diff --git a/vendor/cache/nio4r-2.5.2.gem b/vendor/cache/nio4r-2.5.2.gem
+deleted file mode 100644
+index 4500941..0000000
+Binary files a/vendor/cache/nio4r-2.5.2.gem and /dev/null differ
+diff --git a/vendor/cache/nokogiri-1.10.9-x86-mingw32.gem b/vendor/cache/nokogiri-1.10.9-x86-mingw32.gem
+deleted file mode 100644
+index 2600cc1..0000000
+Binary files a/vendor/cache/nokogiri-1.10.9-x86-mingw32.gem and /dev/null differ
+diff --git a/vendor/cache/orm_adapter-0.5.0.gem b/vendor/cache/orm_adapter-0.5.0.gem
+deleted file mode 100644
+index fbc5b17..0000000
+Binary files a/vendor/cache/orm_adapter-0.5.0.gem and /dev/null differ
+diff --git a/vendor/cache/pg-1.2.3-x86-mingw32.gem b/vendor/cache/pg-1.2.3-x86-mingw32.gem
+deleted file mode 100644
+index 3d7a315..0000000
+Binary files a/vendor/cache/pg-1.2.3-x86-mingw32.gem and /dev/null differ
+diff --git a/vendor/cache/public_suffix-4.0.4.gem b/vendor/cache/public_suffix-4.0.4.gem
+deleted file mode 100644
+index c112d0b..0000000
+Binary files a/vendor/cache/public_suffix-4.0.4.gem and /dev/null differ
+diff --git a/vendor/cache/puma-3.12.4.gem b/vendor/cache/puma-3.12.4.gem
+deleted file mode 100644
+index 41b5e59..0000000
+Binary files a/vendor/cache/puma-3.12.4.gem and /dev/null differ
+diff --git a/vendor/cache/rack-2.2.2.gem b/vendor/cache/rack-2.2.2.gem
+deleted file mode 100644
+index 82d4c7e..0000000
+Binary files a/vendor/cache/rack-2.2.2.gem and /dev/null differ
+diff --git a/vendor/cache/rack-test-1.1.0.gem b/vendor/cache/rack-test-1.1.0.gem
+deleted file mode 100644
+index 3fb2d3a..0000000
+Binary files a/vendor/cache/rack-test-1.1.0.gem and /dev/null differ
+diff --git a/vendor/cache/rails-5.1.7.gem b/vendor/cache/rails-5.1.7.gem
+deleted file mode 100644
+index aa0102a..0000000
+Binary files a/vendor/cache/rails-5.1.7.gem and /dev/null differ
+diff --git a/vendor/cache/rails-dom-testing-2.0.3.gem b/vendor/cache/rails-dom-testing-2.0.3.gem
+deleted file mode 100644
+index f311130..0000000
+Binary files a/vendor/cache/rails-dom-testing-2.0.3.gem and /dev/null differ
+diff --git a/vendor/cache/rails-html-sanitizer-1.3.0.gem b/vendor/cache/rails-html-sanitizer-1.3.0.gem
+deleted file mode 100644
+index bd8e8aa..0000000
+Binary files a/vendor/cache/rails-html-sanitizer-1.3.0.gem and /dev/null differ
+diff --git a/vendor/cache/rails_12factor-0.0.3.gem b/vendor/cache/rails_12factor-0.0.3.gem
+deleted file mode 100644
+index 26b17bf..0000000
+Binary files a/vendor/cache/rails_12factor-0.0.3.gem and /dev/null differ
+diff --git a/vendor/cache/rails_serve_static_assets-0.0.5.gem b/vendor/cache/rails_serve_static_assets-0.0.5.gem
+deleted file mode 100644
+index dfe349c..0000000
+Binary files a/vendor/cache/rails_serve_static_assets-0.0.5.gem and /dev/null differ
+diff --git a/vendor/cache/rails_stdout_logging-0.0.5.gem b/vendor/cache/rails_stdout_logging-0.0.5.gem
+deleted file mode 100644
+index f09bc21..0000000
+Binary files a/vendor/cache/rails_stdout_logging-0.0.5.gem and /dev/null differ
+diff --git a/vendor/cache/railties-5.1.7.gem b/vendor/cache/railties-5.1.7.gem
+deleted file mode 100644
+index e934881..0000000
+Binary files a/vendor/cache/railties-5.1.7.gem and /dev/null differ
+diff --git a/vendor/cache/rake-13.0.1.gem b/vendor/cache/rake-13.0.1.gem
+deleted file mode 100644
+index 8753712..0000000
+Binary files a/vendor/cache/rake-13.0.1.gem and /dev/null differ
+diff --git a/vendor/cache/rb-fsevent-0.10.3.gem b/vendor/cache/rb-fsevent-0.10.3.gem
+deleted file mode 100644
+index e887082..0000000
+Binary files a/vendor/cache/rb-fsevent-0.10.3.gem and /dev/null differ
+diff --git a/vendor/cache/rb-inotify-0.10.1.gem b/vendor/cache/rb-inotify-0.10.1.gem
+deleted file mode 100644
+index 276590b..0000000
+Binary files a/vendor/cache/rb-inotify-0.10.1.gem and /dev/null differ
+diff --git a/vendor/cache/regexp_parser-0.5.0.gem b/vendor/cache/regexp_parser-0.5.0.gem
+deleted file mode 100644
+index fc4b4c4..0000000
+Binary files a/vendor/cache/regexp_parser-0.5.0.gem and /dev/null differ
+diff --git a/vendor/cache/responders-2.4.1.gem b/vendor/cache/responders-2.4.1.gem
+deleted file mode 100644
+index a749cb1..0000000
+Binary files a/vendor/cache/responders-2.4.1.gem and /dev/null differ
+diff --git a/vendor/cache/rubyzip-1.3.0.gem b/vendor/cache/rubyzip-1.3.0.gem
+deleted file mode 100644
+index 95fb164..0000000
+Binary files a/vendor/cache/rubyzip-1.3.0.gem and /dev/null differ
+diff --git a/vendor/cache/sass-3.7.4.gem b/vendor/cache/sass-3.7.4.gem
+deleted file mode 100644
+index b48c3b8..0000000
+Binary files a/vendor/cache/sass-3.7.4.gem and /dev/null differ
+diff --git a/vendor/cache/sass-listen-4.0.0.gem b/vendor/cache/sass-listen-4.0.0.gem
+deleted file mode 100644
+index 9464653..0000000
+Binary files a/vendor/cache/sass-listen-4.0.0.gem and /dev/null differ
+diff --git a/vendor/cache/sass-rails-5.0.7.gem b/vendor/cache/sass-rails-5.0.7.gem
+deleted file mode 100644
+index 7363b9e..0000000
+Binary files a/vendor/cache/sass-rails-5.0.7.gem and /dev/null differ
+diff --git a/vendor/cache/sassc-2.2.1-x86-mingw32.gem b/vendor/cache/sassc-2.2.1-x86-mingw32.gem
+deleted file mode 100644
+index f0132e6..0000000
+Binary files a/vendor/cache/sassc-2.2.1-x86-mingw32.gem and /dev/null differ
+diff --git a/vendor/cache/selenium-webdriver-3.142.7.gem b/vendor/cache/selenium-webdriver-3.142.7.gem
+deleted file mode 100644
+index ea1a761..0000000
+Binary files a/vendor/cache/selenium-webdriver-3.142.7.gem and /dev/null differ
+diff --git a/vendor/cache/spring-2.0.2.gem b/vendor/cache/spring-2.0.2.gem
+deleted file mode 100644
+index 808adf8..0000000
+Binary files a/vendor/cache/spring-2.0.2.gem and /dev/null differ
+diff --git a/vendor/cache/spring-watcher-listen-2.0.1.gem b/vendor/cache/spring-watcher-listen-2.0.1.gem
+deleted file mode 100644
+index aabf22c..0000000
+Binary files a/vendor/cache/spring-watcher-listen-2.0.1.gem and /dev/null differ
+diff --git a/vendor/cache/sprockets-3.7.2.gem b/vendor/cache/sprockets-3.7.2.gem
+deleted file mode 100644
+index d74211a..0000000
+Binary files a/vendor/cache/sprockets-3.7.2.gem and /dev/null differ
+diff --git a/vendor/cache/sprockets-rails-3.2.1.gem b/vendor/cache/sprockets-rails-3.2.1.gem
+deleted file mode 100644
+index 58921be..0000000
+Binary files a/vendor/cache/sprockets-rails-3.2.1.gem and /dev/null differ
+diff --git a/vendor/cache/sqlite3-1.3.13-x86-mingw32.gem b/vendor/cache/sqlite3-1.3.13-x86-mingw32.gem
+deleted file mode 100644
+index d261af6..0000000
+Binary files a/vendor/cache/sqlite3-1.3.13-x86-mingw32.gem and /dev/null differ
+diff --git a/vendor/cache/thor-1.0.1.gem b/vendor/cache/thor-1.0.1.gem
+deleted file mode 100644
+index d7d0a79..0000000
+Binary files a/vendor/cache/thor-1.0.1.gem and /dev/null differ
+diff --git a/vendor/cache/thread_safe-0.3.6.gem b/vendor/cache/thread_safe-0.3.6.gem
+deleted file mode 100644
+index 7ee950f..0000000
+Binary files a/vendor/cache/thread_safe-0.3.6.gem and /dev/null differ
+diff --git a/vendor/cache/tilt-2.0.10.gem b/vendor/cache/tilt-2.0.10.gem
+deleted file mode 100644
+index b432e15..0000000
+Binary files a/vendor/cache/tilt-2.0.10.gem and /dev/null differ
+diff --git a/vendor/cache/turbolinks-5.2.1.gem b/vendor/cache/turbolinks-5.2.1.gem
+deleted file mode 100644
+index 08cd6cc..0000000
+Binary files a/vendor/cache/turbolinks-5.2.1.gem and /dev/null differ
+diff --git a/vendor/cache/turbolinks-source-5.2.0.gem b/vendor/cache/turbolinks-source-5.2.0.gem
+deleted file mode 100644
+index d66bd73..0000000
+Binary files a/vendor/cache/turbolinks-source-5.2.0.gem and /dev/null differ
+diff --git a/vendor/cache/twitter-bootstrap-rails-3.2.2.gem b/vendor/cache/twitter-bootstrap-rails-3.2.2.gem
+deleted file mode 100644
+index ee3f1d0..0000000
+Binary files a/vendor/cache/twitter-bootstrap-rails-3.2.2.gem and /dev/null differ
+diff --git a/vendor/cache/tzinfo-1.2.7.gem b/vendor/cache/tzinfo-1.2.7.gem
+deleted file mode 100644
+index 5549713..0000000
+Binary files a/vendor/cache/tzinfo-1.2.7.gem and /dev/null differ
+diff --git a/vendor/cache/tzinfo-data-1.2019.3.gem b/vendor/cache/tzinfo-data-1.2019.3.gem
+deleted file mode 100644
+index d9fc2a0..0000000
+Binary files a/vendor/cache/tzinfo-data-1.2019.3.gem and /dev/null differ
+diff --git a/vendor/cache/uglifier-4.2.0.gem b/vendor/cache/uglifier-4.2.0.gem
+deleted file mode 100644
+index 9b97e3c..0000000
+Binary files a/vendor/cache/uglifier-4.2.0.gem and /dev/null differ
+diff --git a/vendor/cache/warden-1.2.8.gem b/vendor/cache/warden-1.2.8.gem
+deleted file mode 100644
+index 549ef41..0000000
+Binary files a/vendor/cache/warden-1.2.8.gem and /dev/null differ
+diff --git a/vendor/cache/web-console-3.7.0.gem b/vendor/cache/web-console-3.7.0.gem
+deleted file mode 100644
+index 82e5bde..0000000
+Binary files a/vendor/cache/web-console-3.7.0.gem and /dev/null differ
+diff --git a/vendor/cache/websocket-driver-0.6.5.gem b/vendor/cache/websocket-driver-0.6.5.gem
+deleted file mode 100644
+index e3a0776..0000000
+Binary files a/vendor/cache/websocket-driver-0.6.5.gem and /dev/null differ
+diff --git a/vendor/cache/websocket-extensions-0.1.4.gem b/vendor/cache/websocket-extensions-0.1.4.gem
+deleted file mode 100644
+index f8ed3cb..0000000
+Binary files a/vendor/cache/websocket-extensions-0.1.4.gem and /dev/null differ
+diff --git a/vendor/cache/xpath-3.2.0.gem b/vendor/cache/xpath-3.2.0.gem
+deleted file mode 100644
+index 734ed7d..0000000
+Binary files a/vendor/cache/xpath-3.2.0.gem and /dev/null differ
