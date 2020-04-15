@@ -113,7 +113,6 @@ class TasksController < ApplicationController
     end
 
     respond_to do |format|
-      #format.html {redirect_to projects_path}
       format.js { @project = Project.find(params[:project_id]) }
     end
   end

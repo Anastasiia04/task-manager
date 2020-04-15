@@ -25,7 +25,7 @@ gem 'bootstrap3-datetimepicker-rails', '~> 4.14.30'
 gem 'bootstrap_form', '~> 2.6'
 gem 'bootsnap', '<= 1.1.0'
 gem 'client_side_validations', '~> 9.0', '>= 9.0.1'
-
+gem 'devise'
 gem 'acts_as_list'
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
