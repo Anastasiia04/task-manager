@@ -1,4 +1,5 @@
 #SQL task:
+
 *get all statuses, not repeating, alphabetically ordered
 ```sql
 SELECT DISTINCT status
@@ -38,7 +39,7 @@ FROM tasks INNER JOIN (SELECT id, name FROM tasks GROUP BY name HAVING count(id)
 ON tasks.name = duplicate.name
 ORDER BY tasks.name;
 ```
-*get the list of tasks having several exact matches of both name and status, from the project ‘Garage’. Order by matches count
+*get list of tasks having several exact matches of both name and status, from the project ‘Garage’. Order by matches count
 ```sql
 SELECT tasks.name
 FROM tasks INNER JOIN projects
