@@ -1,3 +1,4 @@
+
 <div id="task_<%= task.id %>" class="list-group-item task">
 
   <%= link_to deadline_task_path(task), remote: true do %>
@@ -22,8 +23,7 @@
     <%= check_box_tag 'complete', task.completed, task.completed,:data => {remote: true, url: url_for(action: 'complete', id: task.id, complete: task.completed, controller: :tasks), method: :post } %>
 
   </span>
-  <%= task.position %>
-
+  
   <%= render('tasks/move', task: task) %>
 
   <%= link_to [task.project, task], method: :delete, data: {confirm: 'Are you sure?'}, remote: true do %>
@@ -44,4 +44,4 @@
   </div>
 
   <div id="edit_task_<%= task.id %>" class="edit_task"></div>
-
+  

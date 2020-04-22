@@ -5,6 +5,6 @@ class Task < ApplicationRecord
   
   scope :completed, -> { where(completed: true) }
   scope :uncompleted, -> { where(completed: false) }
-  acts_as_list 
+  acts_as_list add_new_at: :top
   
 end
