@@ -8,22 +8,23 @@ ORDER BY status;
 ```
 *get the count of all tasks in each project, order by tasks count descending
 ```sql
-SELECT COUNT()
-FROM tasks
-GROUP BY project_id
-ORDER BY COUNT() DESC;
+SELECT projects.id, COUNT(tasks) AS task_count
+FROM tasks RIGHT JOIN projects
+ON tasks.project_id = projects.id
+GROUP BY projects.id
+ORDER BY task_count DESC
 ```
 *get the count of all tasks in each project, order by projects names
 ```sql
 SELECT projects.name, COUNT() AS t_count
-FROM tasks INNER JOIN projects
+FROM tasks RIGHT JOIN projects
 ON tasks.project_id = projects.id
 GROUP BY projects.id
-ORDER BY projects.name;
+ORDER BY t_count;
 ```
 *get the tasks for all projects having the name beginning with “N” letter
 ```sql
-SELECT * FROM tasks WHERE name LIKE 'N%';
+SELECT * FROM projects WHERE name LIKE 'N%';
 ```
 *get the list of all projects containing the ‘a’ letter in the middle of the name, and show the tasks count near each project. Mention that there can exist projects without tasks and tasks with project_id=NULL
 ```sql
@@ -35,7 +36,7 @@ GROUP BY projects.name;
 *get the list of tasks with duplicate names. Order alphabetically
 ```sql
 SELECT tasks.name, tasks.id
-FROM tasks INNER JOIN (SELECT id, name FROM tasks GROUP BY name HAVING count(id) > 1) duplicate
+FROM tasks INNER JOIN (SELECT id, name FROM tasks GROUP BY name HAVING count(name) > 1) duplicate
 ON tasks.name = duplicate.name
 ORDER BY tasks.name;
 ```
